@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#087b48">
+<title>Naija Pocket Tools</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7f5;color:#17251d;font-family:Arial,sans-serif}
+header{background:#087b48;color:white;padding:24px 18px 30px;border-radius:0 0 25px 25px}
+header h1{margin:0;font-size:25px}
+header p{font-size:14px;opacity:.9}
+.container{padding:18px;max-width:650px;margin:auto}
+.welcome{font-size:20px;font-weight:bold;margin-bottom:5px}
+.sub{color:#68766d;font-size:14px;margin-bottom:20px}
+.install{background:#e0f5e9;padding:15px;border-radius:15px;margin-bottom:20px}
+.install button,.calculate{background:#087b48;color:white;border:0;border-radius:10px;padding:13px;font-weight:bold;width:100%;font-size:15px}
+.install p{font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tool{background:white;padding:17px 13px;border-radius:15px;border:1px solid #e6eee8;min-height:115px;cursor:pointer}
+.tool .emoji{font-size:26px}
+.tool h3{font-size:15px;margin:9px 0 4px}
+.tool p{font-size:12px;color:#77847b;margin:0}
+.panel{display:none;background:white;padding:20px;border-radius:17px;margin-top:20px}
+.panel h2{margin-top:0}
+label{display:block;font-size:13px;margin:13px 0 6px}
+input{width:100%;padding:13px;border:1px solid #d7e1d9;border-radius:9px;font-size:16px}
+.calculate{margin-top:15px}
+.result{background:#e4f5e9;padding:15px;border-radius:10px;margin-top:15px;font-weight:bold}
+.back{background:#eaf0ec;border:0;padding:10px 15px;border-radius:8px;margin-bottom:15px}
+footer{text-align:center;padding:30px;color:#819087;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h1>🇳🇬 Naija Pocket Tools</h1>
+<p>Your everyday Nigerian money and lifestyle assistant.</p>
+</header>
+
+<main class="container">
+<div class="welcome">Welcome home 👋</div>
+<div class="sub">Simple tools. Smarter everyday decisions.</div>
+
+<div class="install">
+<strong>📲 Take us everywhere!</strong>
+<p>Add Naija Pocket Tools to your phone's home screen for quick access.</p>
+<button id="installBtn">Install Naija Pocket Tools</button>
+</div>
+
+<h3>Explore your tools</h3>
+<div class="grid">
+<div class="tool" onclick="openTool('money')">
+<div class="emoji">💰</div><h3>Naira Calculator</h3><p>Calculate money and percentages</p>
+</div>
+<div class="tool" onclick="openTool('fuel')">
+<div class="emoji">⛽</div><h3>Fuel Calculator</h3><p>Estimate your fuel expenses</p>
+</div>
+<div class="tool" onclick="openTool('savings')">
+<div class="emoji">🏦</div><h3>Savings Planner</h3><p>Plan your savings goals</p>
+</div>
+<div class="tool" onclick="openTool('data')">
+<div class="emoji">📱</div><h3>Data Planner</h3><p>Estimate your data usage</p>
+</div>
+<div class="tool" onclick="openTool('electricity')">
+<div class="emoji">💡</div><h3>Electricity Calculator</h3><p>Estimate appliance costs</p>
+</div>
+<div class="tool" onclick="openTool('market')">
+<div class="emoji">🛒</div><h3>Market Budget</h3><p>Calculate your shopping total</p>
+</div>
+</div>
+
+<section class="panel" id="panel">
+<button class="back" onclick="closeTool()">← Back to tools</button>
+<h2 id="toolTitle"></h2>
+<div id="toolFields"></div>
+<button class="calculate" onclick="calculate()">Calculate</button>
+<div class="result" id="result" style="display:none"></div>
+</section>
+</main>
+
+<footer>Naija Pocket Tools 🇳🇬<br>Made to make everyday life easier.</footer>
+
+<script>
+let current='';
+let installPrompt=null;
+let marketItems=[];
+
+function openTool(name){
+current=name;
+marketItems=[];
+document.getElementById('result').style.display='none';
+document.getElementById('panel').style.display='block';
+let titles={
+money:'💰 Naira Calculator',
+fuel:'⛽ Fuel Expense Calculator',
+savings:'🏦 Savings Planner',
+data:'📱 Data Planner',
+electricity:'💡 Electricity Calculator',
+market:'🛒 Market Budget'
+};
+document.getElementById('toolTitle').textContent=titles[name];
+let fields={
+money:'<label>Amount (₦)</label><input id="a" type="number" placeholder="Enter amount"><label>Percentage (%)</label><input id="b" type="number" placeholder="Enter percentage">',
+fuel:'<label>Fuel price per litre (₦)</label><input id="a" type="number" placeholder="e.g. 1000"><label>Litres needed</label><input id="b" type="number" placeholder="e.g. 20">',
+savings:'<label>Your savings target (₦)</label><input id="a" type="number" placeholder="e.g. 100000"><label>Number of days</label><input id="b" type="number" placeholder="e.g. 30">',
+data:'<label>Your data bundle (GB)</label><input id="a" type="number" placeholder="e.g. 10"><label>Daily usage (GB)</label><input id="b" type="number" placeholder="e.g. 1">',
+electricity:'<label>Appliance power (Watts)</label><input id="a" type="number" placeholder="e.g. 100"><label>Hours used per day</label><input id="b" type="number" placeholder="e.g. 5"><label>Electricity price per kWh (₦)</label><input id="c" type="number" placeholder="Enter your tariff">',
+market:'<label>Item name</label><input id="item" placeholder="e.g. Rice"><label>Item price (₦)</label><input id="price" type="number" placeholder="e.g. 5000"><button class="calculate" onclick="addItem()">+ Add shopping item</button><div id="items"></div>'
+};
+document.getElementById('toolFields').innerHTML=fields[name];
+document.getElementById('panel').scrollIntoView({behavior:'smooth'});
+}
+
+function val(id){return Number(document.getElementById(id).value)}
+function money(n){return '₦'+n.toLocaleString('en-NG',{maximumFractionDigits:2})}
+
+function calculate(){
+let a=val('a'),b=val('b'),c=val('c'),answer='';
+if(current==='money'){
+if(a<0||b<0)return alert('Enter positive numbers');
+answer='Percentage value: '+money(a*b/100)+' | Total after adding: '+money(a+a*b/100);
+}
+if(current==='fuel'){
+if(a<=0||b<=0)return alert('Enter valid amounts');
+answer='Estimated fuel expense: '+money(a*b);
+}
+if(current==='savings'){
+if(a<=0||b<=0)return alert('Enter valid amounts');
+answer='Daily: '+money(a/b)+' | Weekly: '+money(a/Math.max(1,b/7));
+}
+if(current==='data'){
+if(a<=0||b<=0)return alert('Enter valid amounts');
+answer='Your data may last approximately '+(a/b).toFixed(1)+' days.';
+}
+if(current==='electricity'){
+if(a<=0||b<=0||c<=0)return alert('Enter valid amounts');
+answer='Daily cost: '+money(a*b/1000*c)+' | Monthly estimate: '+money(a*b*30/1000*c);
+}
+if(current==='market'){
+answer='Your shopping total is '+money(marketItems.reduce((s,x)=>s+x.price,0));
+}
+let r=document.getElementById('result');
+r.textContent=answer;
+r.style.display='block';
+}
+
+function addItem(){
+let name=document.getElementById('item').value.trim();
+let price=Number(document.getElementById('price').value);
+if(!name||price<=0)return alert('Enter an item and valid price');
+marketItems.push({name,price});
+document.getElementById('items').innerHTML=marketItems.map(x=>'<p>'+escapeText(x.name)+' — '+money(x.price)+'</p>').join('')+'<strong>Total: '+money(marketItems.reduce((s,x)=>s+x.price,0))+'</strong>';
+document.getElementById('item').value='';
+document.getElementById('price').value='';
+}
+function escapeText(s){
+return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function closeTool(){
+document.getElementById('panel').style.display='none';
+window.scrollTo({top:0,behavior:'smooth'});
+}
+
+window.addEventListener('beforeinstallprompt',e=>{
+e.preventDefault();
+installPrompt=e;
+});
+document.getElementById('installBtn').addEventListener('click',async()=>{
+if(installPrompt){
+installPrompt.prompt();
+await installPrompt.userChoice;
+installPrompt=null;
+}else{
+alert('On Android Chrome, open the browser menu (⋮), then choose Add to Home screen or Install app if available.');
+}
+});
+</script>
+</body>
+  </html>
+  
